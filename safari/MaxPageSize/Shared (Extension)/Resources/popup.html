@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        width: 320px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, sans-serif;
+        font-size: 14px;
+        color: #333;
+        background: #fff;
+      }
+
+      .header {
+        padding: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .header h1 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .header .subtitle {
+        font-size: 12px;
+        opacity: 0.9;
+      }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 10px;
+        padding: 6px 12px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        font-size: 12px;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #4ade80;
+      }
+
+      .status-dot.inactive {
+        background: #f87171;
+      }
+
+      .status-dot.disabled {
+        background: #fbbf24;
+      }
+
+      .section {
+        padding: 16px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .section:last-child {
+        border-bottom: none;
+      }
+
+      .section-title {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #888;
+        margin-bottom: 12px;
+      }
+
+      .toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .toggle-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .toggle-label {
+        font-size: 14px;
+      }
+
+      .toggle-sublabel {
+        font-size: 11px;
+        color: #888;
+        margin-top: 2px;
+      }
+
+      .toggle {
+        position: relative;
+        width: 44px;
+        height: 24px;
+      }
+
+      .toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.3s;
+        border-radius: 24px;
+      }
+
+      .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.3s;
+        border-radius: 50%;
+      }
+
+      .toggle input:checked + .toggle-slider {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      .toggle input:checked + .toggle-slider:before {
+        transform: translateX(20px);
+      }
+
+      .current-site {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 13px;
+      }
+
+      .current-site-url {
+        font-family: monospace;
+        color: #667eea;
+        word-break: break-all;
+      }
+
+      .btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+      }
+
+      .btn-secondary {
+        background: #f1f1f1;
+        color: #333;
+        margin-top: 8px;
+      }
+
+      .btn-secondary:hover {
+        background: #e5e5e5;
+      }
+
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .toggle input:disabled + .toggle-slider {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .success-message {
+        display: none;
+        padding: 12px;
+        background: #d1fae5;
+        color: #065f46;
+        border-radius: 8px;
+        font-size: 13px;
+        text-align: center;
+      }
+
+      .success-message.show {
+        display: block;
+      }
+
+      .footer {
+        padding: 12px 16px;
+        background: #f8f9fa;
+        font-size: 11px;
+        color: #888;
+        text-align: center;
+      }
+
+      .footer a {
+        color: #667eea;
+        text-decoration: none;
+      }
+
+      .site-list {
+        max-height: 150px;
+        overflow-y: auto;
+        margin-top: 8px;
+      }
+
+      .site-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        margin-bottom: 6px;
+        font-size: 13px;
+      }
+
+      .site-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .site-item-host {
+        font-family: monospace;
+        color: #333;
+        word-break: break-all;
+        flex: 1;
+      }
+
+      .site-item-remove {
+        background: none;
+        border: none;
+        color: #f87171;
+        cursor: pointer;
+        padding: 4px 8px;
+        font-size: 16px;
+        line-height: 1;
+        border-radius: 4px;
+        margin-left: 8px;
+      }
+
+      .site-item-remove:hover {
+        background: #fef2f2;
+      }
+
+      .add-site-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .add-site-input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 13px;
+        font-family: monospace;
+      }
+
+      .add-site-input:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .btn-small {
+        padding: 7px 12px;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .empty-list {
+        color: #888;
+        font-size: 12px;
+        text-align: center;
+        padding: 12px;
+      }
+
+      .section-description {
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 12px;
+      }
+
+      .add-current-btn {
+        margin-top: 8px;
+        width: 100%;
+      }
+
+      .custom-param-form {
+        margin-top: 8px;
+      }
+
+      .custom-param-form .add-site-input {
+        width: 100%;
+        margin-bottom: 8px;
+      }
+
+      .custom-param-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      .custom-param-row input {
+        width: 70px;
+        flex-shrink: 0;
+        margin-bottom: 0;
+        height: 34px;
+        box-sizing: border-box;
+      }
+
+      .custom-param-row .btn {
+        flex-shrink: 0;
+        width: auto;
+        height: 34px;
+        padding: 0 12px;
+        box-sizing: border-box;
+      }
+
+      .site-item-details {
+        font-size: 11px;
+        color: #888;
+        font-family: monospace;
+      }
+
+      .manage-sites-section {
+        display: none;
+      }
+
+      .manage-sites-section.show {
+        display: block;
+      }
+
+      .back-btn {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: none;
+        border: none;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #888;
+        cursor: pointer;
+        padding: 0;
+        margin-bottom: 12px;
+      }
+
+      .back-btn:hover {
+        color: #667eea;
+      }
+
+      .main-content.hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-content" id="mainContent">
+      <div class="header">
+        <h1>Max Page Size</h1>
+        <div class="subtitle">Automatically maximize results per page</div>
+        <div class="status-badge">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Active</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Current Page</div>
+        <div class="current-site">
+          <div class="current-site-url" id="currentUrl">Loading...</div>
+        </div>
+        <button class="btn btn-secondary" id="disableForSiteBtn" style="margin-top: 12px">
+          Disable for this site
+        </button>
+      </div>
+
+      <div class="section" id="customParamSection" style="display: none;">
+        <div class="section-title">URL Parameter</div>
+        <div class="section-description">Add a query parameter for this site (e.g., &count=50)</div>
+        <div class="custom-param-row">
+          <input
+            type="text"
+            class="add-site-input"
+            id="currentParamName"
+            placeholder="param"
+          />
+          <input
+            type="text"
+            class="add-site-input"
+            id="currentParamValue"
+            placeholder="value"
+          />
+          <button class="btn btn-primary btn-small" id="saveCurrentParamBtn">
+            Save
+          </button>
+        </div>
+        <button class="btn btn-secondary btn-small" id="removeCurrentParamBtn" style="margin-top: 8px; display: none;">
+          Remove Parameter
+        </button>
+      </div>
+
+
+      <div class="section">
+        <div class="section-title">Not Working?</div>
+        <button class="btn btn-primary" id="reportBtn">Report This Site</button>
+        <div class="success-message" id="reportSuccess">
+          Thanks! We'll look into adding support for this site.
+        </div>
+        <button class="btn btn-secondary" id="retryBtn">Retry Detection</button>
+        <div class="error-message" id="retryError" style="display: none; margin-top: 8px; padding: 12px; background: #fef2f2; color: #dc2626; border-radius: 8px; font-size: 12px; font-family: monospace; word-break: break-all;"></div>
+      </div>
+
+      <div class="section">
+        <button class="btn btn-secondary" id="settingsBtn">Settings</button>
+      </div>
+
+      <div class="footer">
+        Made with <span style="color: #333;">&#9829;</span> by
+        <a href="https://ian.maccallum.dev" target="_blank">Ian MacCallum</a>
+      </div>
+    </div>
+
+    <div class="manage-sites-section" id="manageSitesSection">
+      <div class="section">
+        <button class="back-btn" id="backBtn">&larr; Back</button>
+        <div class="section-title">General</div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Enable Extension</div>
+            <div class="toggle-sublabel">Globally enable or disable</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="globalToggle" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Enable on all sites</div>
+            <div class="toggle-sublabel">Off = only enabled sites</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="newSitesToggle" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <!-- Infinite Scroll - Feature flagged, hidden for now
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Infinite Scroll</div>
+            <div class="toggle-sublabel">Auto-click "Load More" buttons</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="infiniteScrollToggle" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        -->
+      </div>
+
+      <div class="section" id="enabledSitesSection" style="display: none;">
+        <div class="section-title">Enabled Sites</div>
+        <div class="section-description">
+          The extension will only run on these sites.
+        </div>
+        <div class="site-list" id="enabledSitesList"></div>
+        <div class="add-site-row">
+          <input
+            type="text"
+            class="add-site-input"
+            id="enabledSiteInput"
+            placeholder="example.com"
+          />
+          <button class="btn btn-primary btn-small" id="addEnabledSiteBtn">
+            Add
+          </button>
+        </div>
+        <button
+          class="btn btn-secondary btn-small add-current-btn"
+          id="addCurrentEnabledBtn"
+        >
+          + Add current site
+        </button>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Disabled Sites</div>
+        <div class="section-description">
+          Never run on these sites.
+        </div>
+        <div class="site-list" id="disabledSitesList"></div>
+        <div class="add-site-row">
+          <input
+            type="text"
+            class="add-site-input"
+            id="disabledSiteInput"
+            placeholder="example.com"
+          />
+          <button class="btn btn-primary btn-small" id="addDisabledSiteBtn">
+            Add
+          </button>
+        </div>
+        <button
+          class="btn btn-secondary btn-small add-current-btn"
+          id="addCurrentDisabledBtn"
+        >
+          + Add current site
+        </button>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Custom URL Parameters</div>
+        <div class="section-description">
+          For sites without page size controls, add a URL parameter (e.g.,
+          <code>&count=50</code> for Bing).
+        </div>
+        <div class="site-list" id="customParamsList"></div>
+        <div class="custom-param-form">
+          <input
+            type="text"
+            class="add-site-input"
+            id="customParamDomain"
+            placeholder="example.com"
+          />
+          <div class="custom-param-row">
+            <input
+              type="text"
+              class="add-site-input"
+              id="customParamName"
+              placeholder="param"
+            />
+            <input
+              type="text"
+              class="add-site-input"
+              id="customParamValue"
+              placeholder="value"
+            />
+            <button class="btn btn-primary btn-small" id="addCustomParamBtn">
+              Add
+            </button>
+          </div>
+        </div>
+        <button
+          class="btn btn-secondary btn-small add-current-btn"
+          id="addCurrentCustomParamBtn"
+        >
+          + Use current site
+        </button>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
