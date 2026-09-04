@@ -1,3 +1,6 @@
 .DS_STORE
 *.xcuserstate
 xcuserdata/
+# Git worktrees (Claude Code)
+.worktrees/
+.claude/worktrees/
